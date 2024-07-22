@@ -1,0 +1,7 @@
+Werkzeug
+Flask
+gunicorn
+yt-dlp
+Flask-SQLAlchemy
+flask-cors
+python-dotenv

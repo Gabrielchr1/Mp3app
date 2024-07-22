@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download de Áudio</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Baixar Áudio do YouTube</h1>
+        <form id="download-form" action="/download" method="post">
+            <div class="form-group">
+                <label for="url">URL do Vídeo:</label>
+                <input type="text" id="url" name="url" placeholder="Cole o URL do vídeo aqui">
+            </div>
+            <input type="button" id="start-button" value="Baixar Áudio">
+        </form>
+        <div id="progress-container" class="progress-container" style="display: none;">
+            <div id="progress-bar" class="progress-bar">0%</div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('start-button').addEventListener('click', function() {
+            var url = document.getElementById('url').value;
+
+            if (url) {
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', '/download', true);
+                xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+                xhr.responseType = 'blob';
+
+                xhr.onload = function() {
+                    if (xhr.status === 200) {
+                        var blob = new Blob([xhr.response], { type: 'audio/mp3' });
+                        var link = document.createElement('a');
+                        link.href = window.URL.createObjectURL(blob);
+                        link.download = 'audio.mp3';
+                        link.click();
+                        document.getElementById('progress-container').style.display = 'none';
+                    } else {
+                        alert('Erro ao baixar o áudio.');
+                    }
+                };
+
+                xhr.onprogress = function(event) {
+                    if (event.lengthComputable) {
+                        var percentComplete = Math.round((event.loaded / event.total) * 100);
+                        document.getElementById('progress-container').style.display = 'block';
+                        document.getElementById('progress-bar').style.width = percentComplete + '%';
+                        document.getElementById('progress-bar').textContent = percentComplete + '%';
+                    }
+                };
+
+                xhr.send(JSON.stringify({ url: url }));
+            } else {
+                alert('Por favor, preencha todos os campos.');
+            }
+        });
+    </script>
+</body>
+</html>
